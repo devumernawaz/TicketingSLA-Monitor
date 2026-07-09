@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="../src/TicketingSLA.API/TicketingSLA.API.csproj" />
+  <Project Path="../src/TicketingSLA.Application/TicketingSLA.Application.csproj" />
+  <Project Path="../src/TicketingSLA.Domain/TicketingSLA.Domain.csproj" />
+  <Project Path="../src/TicketingSLA.Infrastructure/TicketingSLA.Infrastructure.csproj" />
+  <Project Path="../src/TicketingSLA.Shared/TicketingSLA.Shared.csproj" />
+  <Project Path="../tests/TicketingSLA.IntegrationTests/TicketingSLA.IntegrationTests.csproj" />
+  <Project Path="../tests/TicketingSLA.UnitTests/TicketingSLA.UnitTests.csproj" />
+</Solution>
