@@ -55,6 +55,7 @@ builder.Logging.AddSimpleConsole(options =>
 var app = builder.Build();
 app.UseCors("AllowFrontend");
 app.UseMiddleware<TicketingSLA.API.Middleware.CorrelationIdMiddleware>();
+app.UseMiddleware<TicketingSLA.API.Middleware.ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 
