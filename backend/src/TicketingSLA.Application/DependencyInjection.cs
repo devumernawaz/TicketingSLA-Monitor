@@ -11,6 +11,7 @@ public static class DependencyInjection
         services.AddScoped<TicketService>();
         services.AddScoped<SLAPolicyService>();
         services.AddScoped<DashboardService>();
+        services.AddScoped<TenantService>();
         return services;
     }
 }

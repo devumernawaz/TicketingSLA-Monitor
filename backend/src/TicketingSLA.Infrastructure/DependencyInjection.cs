@@ -31,6 +31,8 @@ public static class DependencyInjection
         services.AddHostedService<SLABreachMonitorService>();
         services.AddScoped<IAlertService, MockAlertService>();
         services.AddScoped<IDashboardRepository, DashboardRepository>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IAuthService, AuthService>();
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
