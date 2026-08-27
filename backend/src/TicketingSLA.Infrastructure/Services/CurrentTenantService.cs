@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using TicketingSLA.Application.Interfaces;
+using TicketingSLA.Infrastructure.Identity;
 
 namespace TicketingSLA.Infrastructure.Services;
 
@@ -16,12 +17,12 @@ public class CurrentTenantService : ICurrentTenantService
     {
         get
         {
-            var header = _httpContextAccessor.HttpContext?.Request.Headers["X-Tenant-Id"].FirstOrDefault();
+            var claim = _httpContextAccessor.HttpContext?.User.FindFirst(AppClaimTypes.TenantId)?.Value;
 
-            if (string.IsNullOrEmpty(header) || !Guid.TryParse(header, out var parsedId))
-                throw new InvalidOperationException("X-Tenant-Id header is missing or invalid.");
+            if (string.IsNullOrEmpty(claim) || !Guid.TryParse(claim, out var tenantId))
+                throw new InvalidOperationException("No authenticated tenant context is available.");
 
-            return parsedId;
+            return tenantId;
         }
     }
 }

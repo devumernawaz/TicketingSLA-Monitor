@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using TicketingSLA.Application;
 using TicketingSLA.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);

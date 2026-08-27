@@ -33,6 +33,7 @@ public class TicketConfiguration : IEntityTypeConfiguration<Ticket>
         builder.Property(t => t.SlaDeadline).IsRequired();
         builder.Property(t => t.BreachedAt);
         builder.Property(t => t.AssignedAgentId);
+        builder.Property(t => t.CreatedByUserId);
 
         // Declare the shadow property here, in the same place it's used —
         // instead of relying on OnModelCreating declaring it later.

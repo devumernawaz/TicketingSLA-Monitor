@@ -13,10 +13,11 @@ public class Ticket
     public DateTime SlaDeadline { get; private set; }
     public DateTime? BreachedAt { get; private set; }
     public Guid? AssignedAgentId { get; private set; }
+    public Guid? CreatedByUserId { get; private set; }
 
     private Ticket() { }
 
-    public Ticket(string title, string description, SLAPolicy slaPolicy)
+    public Ticket(string title, string description, SLAPolicy slaPolicy, Guid? createdByUserId = null)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new ArgumentException("Title cannot be empty.", nameof(title));
@@ -28,6 +29,7 @@ public class Ticket
         Status = TicketStatus.Open;
         CreatedAt = DateTime.UtcNow;
         SlaDeadline = slaPolicy.CalculateDeadline(CreatedAt);
+        CreatedByUserId = createdByUserId;
     }
 
     public bool IsBreached(DateTime asOf) => Status != TicketStatus.Closed && asOf > SlaDeadline;

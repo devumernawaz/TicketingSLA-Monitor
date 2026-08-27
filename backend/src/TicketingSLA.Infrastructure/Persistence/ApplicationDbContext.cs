@@ -1,10 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TicketingSLA.Application.Interfaces;
 using TicketingSLA.Domain.Entities;
+using TicketingSLA.Infrastructure.Identity;
 
 namespace TicketingSLA.Infrastructure.Persistence;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
 {
     private readonly ICurrentTenantService _currentTenantService;
 
