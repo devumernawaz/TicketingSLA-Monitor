@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TicketingSLA.Application.DTOs.SLAPolicies;
 using TicketingSLA.Application.Services;
 
@@ -6,6 +7,7 @@ namespace TicketingSLA.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class SLAPoliciesController : ControllerBase
 {
     private readonly SLAPolicyService _slaPolicyService;
@@ -16,6 +18,7 @@ public class SLAPoliciesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateSLAPolicyRequest request)
     {
         var result = await _slaPolicyService.CreateAsync(request);

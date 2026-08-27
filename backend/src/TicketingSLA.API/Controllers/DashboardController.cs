@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TicketingSLA.Application.Interfaces;
 using TicketingSLA.Application.Services;
 
@@ -6,6 +7,7 @@ namespace TicketingSLA.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin,Agent")]
 public class DashboardController : ControllerBase
 {
     private readonly DashboardService _dashboardService;

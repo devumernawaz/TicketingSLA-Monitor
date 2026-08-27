@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TicketingSLA.Application.DTOs.Tickets;
 using TicketingSLA.Application.Services;
 
@@ -6,6 +7,7 @@ namespace TicketingSLA.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class TicketsController : ControllerBase
 {
     private readonly TicketService _ticketService;
@@ -41,6 +43,7 @@ public class TicketsController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/assign")]
+    [Authorize(Roles = "Admin,Agent")]
     public async Task<IActionResult> Assign(Guid id, [FromBody] AssignTicketRequest request)
     {
         var result = await _ticketService.AssignTicketAsync(id, request.AgentId);
@@ -50,6 +53,7 @@ public class TicketsController : ControllerBase
     }
 
     [HttpPatch("{id:guid}/close")]
+    [Authorize(Roles = "Admin,Agent")]
     public async Task<IActionResult> Close(Guid id)
     {
         var result = await _ticketService.CloseTicketAsync(id);

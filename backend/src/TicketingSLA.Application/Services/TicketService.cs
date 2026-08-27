@@ -10,15 +10,18 @@ public class TicketService
 {
     private readonly ITicketRepository _ticketRepository;
     private readonly ISLAPolicyRepository _slaPolicyRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IMapper _mapper;
 
     public TicketService(
         ITicketRepository ticketRepository,
         ISLAPolicyRepository slaPolicyRepository,
+        ICurrentUserService currentUserService,
         IMapper mapper)
     {
         _ticketRepository = ticketRepository;
         _slaPolicyRepository = slaPolicyRepository;
+        _currentUserService = currentUserService;
         _mapper = mapper;
     }
 
@@ -31,7 +34,7 @@ public class TicketService
         Ticket ticket;
         try
         {
-            ticket = new Ticket(request.Title, request.Description, slaPolicy);
+            ticket = new Ticket(request.Title, request.Description, slaPolicy, _currentUserService.UserId);
         }
         catch (ArgumentException ex)
         {
@@ -56,6 +59,10 @@ public class TicketService
     public async Task<Result<IEnumerable<TicketResponse>>> GetAllAsync()
     {
         var tickets = await _ticketRepository.GetAllAsync();
+
+        if (_currentUserService.Role == "Client")
+            tickets = tickets.Where(t => t.CreatedByUserId == _currentUserService.UserId);
+
         return Result<IEnumerable<TicketResponse>>.Success(_mapper.Map<IEnumerable<TicketResponse>>(tickets));
     }
 
