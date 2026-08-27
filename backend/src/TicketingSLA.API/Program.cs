@@ -87,3 +87,6 @@ static async Task SeedRolesAsync(IServiceProvider services)
             await roleManager.CreateAsync(new IdentityRole<Guid>(role));
     }
 }
+
+// Exposes Program to WebApplicationFactory<Program> for integration tests.
+public partial class Program { }
