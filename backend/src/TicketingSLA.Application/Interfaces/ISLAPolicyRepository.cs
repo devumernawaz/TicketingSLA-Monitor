@@ -9,5 +9,7 @@ public interface ISLAPolicyRepository
     Task<SLAPolicy?> GetByPriorityAsync(TicketPriority priority);
     Task<IEnumerable<SLAPolicy>> GetAllAsync();
     Task AddAsync(SLAPolicy policy);
+    void Update(SLAPolicy policy);
+    void Delete(SLAPolicy policy);
     Task SaveChangesAsync();
 }

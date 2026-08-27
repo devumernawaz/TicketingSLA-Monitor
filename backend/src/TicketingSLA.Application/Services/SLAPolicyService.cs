@@ -40,4 +40,46 @@ public class SLAPolicyService
         var policies = await _slaPolicyRepository.GetAllAsync();
         return Result<IEnumerable<SLAPolicyResponse>>.Success(_mapper.Map<IEnumerable<SLAPolicyResponse>>(policies));
     }
+
+    public async Task<Result<SLAPolicyResponse>> GetByIdAsync(Guid id)
+    {
+        var policy = await _slaPolicyRepository.GetByIdAsync(id);
+        if (policy is null)
+            return Result<SLAPolicyResponse>.Failure("SLA policy not found.");
+
+        return Result<SLAPolicyResponse>.Success(_mapper.Map<SLAPolicyResponse>(policy));
+    }
+
+    public async Task<Result<SLAPolicyResponse>> UpdateAsync(Guid id, UpdateSLAPolicyRequest request)
+    {
+        var policy = await _slaPolicyRepository.GetByIdAsync(id);
+        if (policy is null)
+            return Result<SLAPolicyResponse>.Failure("SLA policy not found.");
+
+        try
+        {
+            policy.Update(request.Name, request.ResponseTimeHours);
+        }
+        catch (ArgumentException ex)
+        {
+            return Result<SLAPolicyResponse>.Failure(ex.Message);
+        }
+
+        _slaPolicyRepository.Update(policy);
+        await _slaPolicyRepository.SaveChangesAsync();
+
+        return Result<SLAPolicyResponse>.Success(_mapper.Map<SLAPolicyResponse>(policy));
+    }
+
+    public async Task<Result> DeleteAsync(Guid id)
+    {
+        var policy = await _slaPolicyRepository.GetByIdAsync(id);
+        if (policy is null)
+            return Result.Failure("SLA policy not found.");
+
+        _slaPolicyRepository.Delete(policy);
+        await _slaPolicyRepository.SaveChangesAsync();
+
+        return Result.Success();
+    }
 }

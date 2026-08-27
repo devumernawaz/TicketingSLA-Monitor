@@ -33,4 +33,33 @@ public class SLAPoliciesController : ControllerBase
         var result = await _slaPolicyService.GetAllAsync();
         return Ok(result.Value);
     }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        var result = await _slaPolicyService.GetByIdAsync(id);
+        return result.IsSuccess
+            ? Ok(result.Value)
+            : NotFound(new { error = result.Error });
+    }
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateSLAPolicyRequest request)
+    {
+        var result = await _slaPolicyService.UpdateAsync(id, request);
+        return result.IsSuccess
+            ? Ok(result.Value)
+            : BadRequest(new { error = result.Error });
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var result = await _slaPolicyService.DeleteAsync(id);
+        return result.IsSuccess
+            ? NoContent()
+            : BadRequest(new { error = result.Error });
+    }
 }

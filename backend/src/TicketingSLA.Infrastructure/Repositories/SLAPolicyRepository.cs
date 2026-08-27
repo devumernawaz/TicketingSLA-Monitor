@@ -27,6 +27,12 @@ public class SLAPolicyRepository : ISLAPolicyRepository
     public async Task AddAsync(SLAPolicy policy) =>
         await _context.SLAPolicies.AddAsync(policy);
 
+    public void Update(SLAPolicy policy) =>
+        _context.SLAPolicies.Update(policy);
+
+    public void Delete(SLAPolicy policy) =>
+        _context.SLAPolicies.Remove(policy);
+
     public async Task SaveChangesAsync() =>
         await _context.SaveChangesAsync();
 }

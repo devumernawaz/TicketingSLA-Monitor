@@ -23,4 +23,15 @@ public class SLAPolicy
     }
 
     public DateTime CalculateDeadline(DateTime createdAt) => createdAt.AddHours(ResponseTimeHours);
+
+    public void Update(string name, int responseTimeHours)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
+        if (responseTimeHours <= 0)
+            throw new ArgumentException("Response time must be positive.", nameof(responseTimeHours));
+
+        Name = name;
+        ResponseTimeHours = responseTimeHours;
+    }
 }

@@ -56,4 +56,15 @@ public class Ticket
     {
         Status = TicketStatus.Closed;
     }
+
+    public void Update(string title, string description)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("Title cannot be empty.", nameof(title));
+        if (Status == TicketStatus.Closed)
+            throw new InvalidOperationException("Cannot edit a closed ticket.");
+
+        Title = title;
+        Description = description;
+    }
 }
