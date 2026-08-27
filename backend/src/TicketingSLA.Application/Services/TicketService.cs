@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using TicketingSLA.Application.DTOs.Tickets;
 using TicketingSLA.Application.Interfaces;
 using TicketingSLA.Domain.Entities;
@@ -12,22 +13,35 @@ public class TicketService
     private readonly ITicketRepository _ticketRepository;
     private readonly ISLAPolicyRepository _slaPolicyRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IValidator<CreateTicketRequest> _createValidator;
+    private readonly IValidator<UpdateTicketRequest> _updateValidator;
+    private readonly IValidator<AssignTicketRequest> _assignValidator;
     private readonly IMapper _mapper;
 
     public TicketService(
         ITicketRepository ticketRepository,
         ISLAPolicyRepository slaPolicyRepository,
         ICurrentUserService currentUserService,
+        IValidator<CreateTicketRequest> createValidator,
+        IValidator<UpdateTicketRequest> updateValidator,
+        IValidator<AssignTicketRequest> assignValidator,
         IMapper mapper)
     {
         _ticketRepository = ticketRepository;
         _slaPolicyRepository = slaPolicyRepository;
         _currentUserService = currentUserService;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
+        _assignValidator = assignValidator;
         _mapper = mapper;
     }
 
     public async Task<Result<TicketResponse>> CreateTicketAsync(CreateTicketRequest request)
     {
+        var validation = await _createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return Result<TicketResponse>.Failure(FormatErrors(validation));
+
         var slaPolicy = await _slaPolicyRepository.GetByPriorityAsync(request.Priority);
         if (slaPolicy is null)
             return Result<TicketResponse>.Failure($"No SLA policy configured for priority '{request.Priority}'.");
@@ -78,6 +92,10 @@ public class TicketService
 
     public async Task<Result<TicketResponse>> UpdateTicketAsync(Guid id, UpdateTicketRequest request)
     {
+        var validation = await _updateValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return Result<TicketResponse>.Failure(FormatErrors(validation));
+
         var ticket = await _ticketRepository.GetByIdAsync(id);
         if (ticket is null || !CanAccess(ticket))
             return Result<TicketResponse>.Failure("Ticket not found.");
@@ -112,15 +130,22 @@ public class TicketService
     private bool CanAccess(Ticket ticket) =>
         _currentUserService.Role != "Client" || ticket.CreatedByUserId == _currentUserService.UserId;
 
-    public async Task<Result<TicketResponse>> AssignTicketAsync(Guid ticketId, Guid agentId)
+    private static string FormatErrors(FluentValidation.Results.ValidationResult validation) =>
+        string.Join(" ", validation.Errors.Select(e => e.ErrorMessage));
+
+    public async Task<Result<TicketResponse>> AssignTicketAsync(Guid ticketId, AssignTicketRequest request)
     {
+        var validation = await _assignValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return Result<TicketResponse>.Failure(FormatErrors(validation));
+
         var ticket = await _ticketRepository.GetByIdAsync(ticketId);
         if (ticket is null)
             return Result<TicketResponse>.Failure("Ticket not found.");
 
         try
         {
-            ticket.AssignTo(agentId);
+            ticket.AssignTo(request.AgentId);
         }
         catch (InvalidOperationException ex)
         {

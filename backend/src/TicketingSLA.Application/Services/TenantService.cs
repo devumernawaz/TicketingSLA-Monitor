@@ -1,4 +1,5 @@
 using AutoMapper;
+using FluentValidation;
 using TicketingSLA.Application.DTOs.Tenants;
 using TicketingSLA.Application.Interfaces;
 using TicketingSLA.Domain.Entities;
@@ -9,16 +10,25 @@ namespace TicketingSLA.Application.Services;
 public class TenantService
 {
     private readonly ITenantRepository _tenantRepository;
+    private readonly IValidator<CreateTenantRequest> _createValidator;
     private readonly IMapper _mapper;
 
-    public TenantService(ITenantRepository tenantRepository, IMapper mapper)
+    public TenantService(
+        ITenantRepository tenantRepository,
+        IValidator<CreateTenantRequest> createValidator,
+        IMapper mapper)
     {
         _tenantRepository = tenantRepository;
+        _createValidator = createValidator;
         _mapper = mapper;
     }
 
     public async Task<Result<TenantResponse>> CreateAsync(CreateTenantRequest request)
     {
+        var validation = await _createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return Result<TenantResponse>.Failure(string.Join(" ", validation.Errors.Select(e => e.ErrorMessage)));
+
         Tenant tenant;
         try
         {

@@ -70,7 +70,7 @@ public class TicketsController : ControllerBase
     [Authorize(Roles = "Admin,Agent")]
     public async Task<IActionResult> Assign(Guid id, [FromBody] AssignTicketRequest request)
     {
-        var result = await _ticketService.AssignTicketAsync(id, request.AgentId);
+        var result = await _ticketService.AssignTicketAsync(id, request);
         return result.IsSuccess
             ? Ok(result.Value)
             : BadRequest(new { error = result.Error });

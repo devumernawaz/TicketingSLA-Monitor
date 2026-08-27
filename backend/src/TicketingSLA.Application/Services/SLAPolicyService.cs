@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using TicketingSLA.Application.DTOs.SLAPolicies;
 using TicketingSLA.Application.Interfaces;
 using TicketingSLA.Domain.Entities;
@@ -9,16 +10,28 @@ namespace TicketingSLA.Application.Services;
 public class SLAPolicyService
 {
     private readonly ISLAPolicyRepository _slaPolicyRepository;
+    private readonly IValidator<CreateSLAPolicyRequest> _createValidator;
+    private readonly IValidator<UpdateSLAPolicyRequest> _updateValidator;
     private readonly IMapper _mapper;
 
-    public SLAPolicyService(ISLAPolicyRepository slaPolicyRepository, IMapper mapper)
+    public SLAPolicyService(
+        ISLAPolicyRepository slaPolicyRepository,
+        IValidator<CreateSLAPolicyRequest> createValidator,
+        IValidator<UpdateSLAPolicyRequest> updateValidator,
+        IMapper mapper)
     {
         _slaPolicyRepository = slaPolicyRepository;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
         _mapper = mapper;
     }
 
     public async Task<Result<SLAPolicyResponse>> CreateAsync(CreateSLAPolicyRequest request)
     {
+        var validation = await _createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return Result<SLAPolicyResponse>.Failure(FormatErrors(validation));
+
         SLAPolicy policy;
         try
         {
@@ -52,6 +65,10 @@ public class SLAPolicyService
 
     public async Task<Result<SLAPolicyResponse>> UpdateAsync(Guid id, UpdateSLAPolicyRequest request)
     {
+        var validation = await _updateValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return Result<SLAPolicyResponse>.Failure(FormatErrors(validation));
+
         var policy = await _slaPolicyRepository.GetByIdAsync(id);
         if (policy is null)
             return Result<SLAPolicyResponse>.Failure("SLA policy not found.");
@@ -82,4 +99,7 @@ public class SLAPolicyService
 
         return Result.Success();
     }
+
+    private static string FormatErrors(FluentValidation.Results.ValidationResult validation) =>
+        string.Join(" ", validation.Errors.Select(e => e.ErrorMessage));
 }

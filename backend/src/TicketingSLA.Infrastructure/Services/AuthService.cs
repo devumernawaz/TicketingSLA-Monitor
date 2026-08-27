@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using TicketingSLA.Application.DTOs.Auth;
 using TicketingSLA.Application.Interfaces;
@@ -12,19 +13,29 @@ public class AuthService : IAuthService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ITenantRepository _tenantRepository;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IValidator<RegisterRequest> _registerValidator;
+    private readonly IValidator<LoginRequest> _loginValidator;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
         ITenantRepository tenantRepository,
-        IJwtTokenGenerator jwtTokenGenerator)
+        IJwtTokenGenerator jwtTokenGenerator,
+        IValidator<RegisterRequest> registerValidator,
+        IValidator<LoginRequest> loginValidator)
     {
         _userManager = userManager;
         _tenantRepository = tenantRepository;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _registerValidator = registerValidator;
+        _loginValidator = loginValidator;
     }
 
     public async Task<Result<AuthResponse>> RegisterAsync(RegisterRequest request)
     {
+        var validation = await _registerValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return Result<AuthResponse>.Failure(string.Join(" ", validation.Errors.Select(e => e.ErrorMessage)));
+
         var tenant = await _tenantRepository.GetByIdAsync(request.TenantId);
         if (tenant is null || !tenant.IsActive)
             return Result<AuthResponse>.Failure("Tenant not found.");
@@ -64,6 +75,10 @@ public class AuthService : IAuthService
 
     public async Task<Result<AuthResponse>> LoginAsync(LoginRequest request)
     {
+        var validation = await _loginValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return Result<AuthResponse>.Failure(string.Join(" ", validation.Errors.Select(e => e.ErrorMessage)));
+
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user is null || !await _userManager.CheckPasswordAsync(user, request.Password))
             return Result<AuthResponse>.Failure("Invalid email or password.");
