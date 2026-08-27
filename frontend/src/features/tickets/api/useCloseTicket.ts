@@ -36,7 +36,7 @@ export function useCloseTicket(tenantId: string) {
     },
 
     onSettled: () => {
-      // Whether it succeeded or failed, refetch to reconcile with真实 server state
+      // Whether it succeeded or failed, refetch to reconcile with real server state
       queryClient.invalidateQueries({ queryKey });
     },
   });
